@@ -370,30 +370,25 @@ const changePassword = async (req, res) => {
 };
 
 const logoutUser = async (req, res) => {
-    try {
-        const role = req.user.role;
-        
-        // Clear cookies
-        res.clearCookie('authToken');
-        res.clearCookie('refreshToken');
-        res.clearCookie('connect.sid');
+    const role = req.user?.role || "User";
 
-        // Destroy session
+    try {
+        res.clearCookie('authToken', { path: '/' });
+        res.clearCookie('refreshToken', { path: '/' });
+        res.clearCookie('connect.sid', { path: '/' });
+
         req.session.destroy((err) => {
             if (err) {
-                console.error('Error destroying session:', err);
-                return res.status(500).json({ message: 'Failed to log out' });
+                return res.status(500).json({ message: 'Logout failed. Please try again.' });
             }
-            return res.status(200).json({ 
-                message: `${role} successfully logged out` 
-            });
+
+            res.status(200).json({ message: `${role} successfully logged out` });
         });
-      
     } catch (error) {
-        console.error('Logout error:', error);
-        return res.status(500).json({ message: 'An unexpected error occurred' });
+        res.status(500).json({ message: 'Unexpected error during logout' });
     }
 };
+
 
 const fetchAccountData = async (req, res) => {
     try {
